@@ -1,0 +1,32 @@
+{
+  "name": "a2ui-react",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/a2ui-react/src",
+  "projectType": "library",
+  "tags": ["scope:a2ui", "type:renderer", "framework:react"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "npx tsup src/index.ts --format cjs,esm --external react --outDir dist",
+        "cwd": "libs/a2ui-react"
+      },
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo 'Dev mode uses source files directly via Vite'",
+        "cwd": "libs/a2ui-react"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx tsc --noEmit",
+        "cwd": "libs/a2ui-react"
+      }
+    }
+  }
+}

@@ -1,0 +1,342 @@
+/* A2UI Demo Application Styles */
+
+:root {
+  /* A2UI Theme Variables */
+  --a2ui-primary-color: #6366f1;
+  --a2ui-primary-light: #eef2ff;
+  --a2ui-surface-color: #f8fafc;
+  --a2ui-text-color: #1e293b;
+  --a2ui-caption-color: #64748b;
+  --a2ui-helper-color: #94a3b8;
+  --a2ui-border-color: #e2e8f0;
+  --a2ui-divider-color: #e2e8f0;
+  --a2ui-error-color: #ef4444;
+  --a2ui-card-bg: #ffffff;
+  --a2ui-card-radius: 12px;
+  --a2ui-card-padding: 20px;
+  --a2ui-button-radius: 8px;
+  --a2ui-input-radius: 8px;
+  --a2ui-chip-bg: #f1f5f9;
+  --a2ui-progress-bg: #e2e8f0;
+  --a2ui-disabled-bg: #f1f5f9;
+  --a2ui-image-radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: var(--a2ui-text-color);
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 16px 32px;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.header p {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.dev-toggle {
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dev-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  gap: 0;
+  max-height: calc(100vh - 72px);
+}
+
+/* Clean mode - hide JSON panel, expand preview */
+.clean-mode .main-content {
+  grid-template-columns: 220px 1fr;
+}
+
+.clean-mode .sidebar {
+  background: #13131f;
+}
+
+.clean-mode .preview {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Sidebar */
+.sidebar {
+  background: #1e1e2e;
+  padding: 20px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar h2 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+  margin-bottom: 12px;
+  margin-top: 24px;
+}
+
+.sidebar h2:first-child {
+  margin-top: 0;
+}
+
+.sample-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sample-btn {
+  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #e2e8f0;
+  transition: all 0.2s ease;
+  text-transform: capitalize;
+}
+
+.sample-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+}
+
+.sample-btn.active {
+  background: var(--a2ui-primary-color);
+  border-color: var(--a2ui-primary-color);
+  color: white;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.events-log {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: 'Fira Code', 'Monaco', monospace;
+  font-size: 11px;
+}
+
+.no-events {
+  color: #64748b;
+  font-style: italic;
+}
+
+.event-item {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.event-item:last-child {
+  border-bottom: none;
+}
+
+.event-type {
+  color: #22d3ee;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.event-component {
+  color: #a78bfa;
+}
+
+.event-payload {
+  color: #94a3b8;
+  margin-top: 4px;
+  font-size: 10px;
+  white-space: pre-wrap;
+}
+
+.data-model {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  font-family: 'Fira Code', 'Monaco', monospace;
+  font-size: 11px;
+  max-height: 150px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+/* Preview Area */
+.preview {
+  background: var(--a2ui-surface-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-header {
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid var(--a2ui-border-color);
+}
+
+.preview-header h2 {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.preview-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* JSON Panel */
+.json-panel {
+  background: #0f172a;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.json-panel h2 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.json-code {
+  font-family: 'Fira Code', 'Monaco', monospace;
+  font-size: 11px;
+  color: #e2e8f0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* A2UI Component Styles */
+@keyframes a2ui-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes a2ui-linear-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@keyframes a2ui-circular-spin {
+  0% {
+    stroke-dashoffset: 0;
+    transform: rotate(0deg);
+  }
+  50% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    transform: rotate(360deg);
+  }
+}
+
+/* Focus styles */
+input:focus,
+select:focus,
+button:focus {
+  outline: 2px solid var(--a2ui-primary-color);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .main-content {
+    grid-template-columns: 240px 1fr 300px;
+  }
+}
+
+@media (max-width: 900px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .sidebar,
+  .json-panel {
+    max-height: 300px;
+  }
+}

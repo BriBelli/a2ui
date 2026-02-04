@@ -1,0 +1,273 @@
+import type { A2UIResponse } from '@a2ui/core';
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  a2ui?: A2UIResponse;
+  timestamp: number;
+}
+
+export interface ChatResponse {
+  text?: string;
+  a2ui?: A2UIResponse;
+}
+
+export class ChatService {
+  private baseUrl = '/api';
+
+  async sendMessage(message: string): Promise<ChatResponse> {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Chat API error:', error);
+      // Return mock data for demo when backend is unavailable
+      return this.getMockResponse(message);
+    }
+  }
+
+  private getMockResponse(message: string): ChatResponse {
+    const lowerMessage = message.toLowerCase();
+
+    // Stock-related queries
+    if (lowerMessage.includes('stock') || lowerMessage.includes('trending')) {
+      return {
+        text: "Here are the top 5 trending stocks right now:",
+        a2ui: {
+          version: "1.0",
+          components: [
+            {
+              id: "stocks-container",
+              type: "container",
+              props: { layout: "vertical", gap: "md" },
+              children: [
+                {
+                  id: "stocks-table",
+                  type: "data-table",
+                  props: {
+                    columns: [
+                      { key: "symbol", label: "Symbol", width: "80px" },
+                      { key: "name", label: "Company", width: "auto" },
+                      { key: "price", label: "Price", width: "100px", align: "right" },
+                      { key: "change", label: "Change", width: "100px", align: "right" },
+                    ],
+                    data: [
+                      { symbol: "NVDA", name: "NVIDIA Corporation", price: "$892.45", change: "+5.2%" },
+                      { symbol: "AAPL", name: "Apple Inc.", price: "$182.63", change: "+1.8%" },
+                      { symbol: "MSFT", name: "Microsoft Corporation", price: "$415.28", change: "+2.1%" },
+                      { symbol: "GOOGL", name: "Alphabet Inc.", price: "$141.80", change: "+1.5%" },
+                      { symbol: "META", name: "Meta Platforms Inc.", price: "$485.92", change: "+3.4%" },
+                    ],
+                  },
+                },
+                {
+                  id: "chart-prompt",
+                  type: "text",
+                  props: {
+                    content: "💡 Ask me to show a chart of any of these stocks!",
+                    variant: "caption",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+    }
+
+    // Chart-related queries
+    if (lowerMessage.includes('chart') || lowerMessage.includes('graph') || lowerMessage.includes('visual')) {
+      return {
+        text: "Here's a performance chart for the trending stocks:",
+        a2ui: {
+          version: "1.0",
+          components: [
+            {
+              id: "chart-container",
+              type: "container",
+              props: { layout: "vertical", gap: "md" },
+              children: [
+                {
+                  id: "stock-chart",
+                  type: "chart",
+                  props: {
+                    chartType: "bar",
+                    title: "Stock Performance (YTD Change %)",
+                    data: {
+                      labels: ["NVDA", "META", "MSFT", "AAPL", "GOOGL"],
+                      datasets: [
+                        {
+                          label: "YTD Performance %",
+                          data: [85.2, 42.5, 35.8, 22.1, 18.5],
+                          backgroundColor: [
+                            "#76b900",
+                            "#0668E1",
+                            "#00a1f1",
+                            "#555555",
+                            "#4285f4",
+                          ],
+                        },
+                      ],
+                    },
+                    options: {
+                      height: 300,
+                    },
+                  },
+                },
+                {
+                  id: "line-chart",
+                  type: "chart",
+                  props: {
+                    chartType: "line",
+                    title: "30-Day Price Trend",
+                    data: {
+                      labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+                      datasets: [
+                        {
+                          label: "NVDA",
+                          data: [750, 810, 855, 892],
+                          borderColor: "#76b900",
+                        },
+                        {
+                          label: "MSFT",
+                          data: [390, 400, 408, 415],
+                          borderColor: "#00a1f1",
+                        },
+                      ],
+                    },
+                    options: {
+                      height: 250,
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+    }
+
+    // Weather queries
+    if (lowerMessage.includes('weather')) {
+      return {
+        text: "Here's the weather forecast:",
+        a2ui: {
+          version: "1.0",
+          components: [
+            {
+              id: "weather-container",
+              type: "container",
+              props: { layout: "horizontal", gap: "md", wrap: true },
+              children: [
+                {
+                  id: "today",
+                  type: "card",
+                  props: {
+                    title: "Today",
+                    subtitle: "San Francisco",
+                  },
+                  children: [
+                    {
+                      id: "today-temp",
+                      type: "text",
+                      props: { content: "72°F", variant: "h1" },
+                    },
+                    {
+                      id: "today-desc",
+                      type: "text",
+                      props: { content: "☀️ Sunny", variant: "body" },
+                    },
+                  ],
+                },
+                {
+                  id: "tomorrow",
+                  type: "card",
+                  props: { title: "Tomorrow" },
+                  children: [
+                    {
+                      id: "tomorrow-temp",
+                      type: "text",
+                      props: { content: "68°F", variant: "h2" },
+                    },
+                    {
+                      id: "tomorrow-desc",
+                      type: "text",
+                      props: { content: "⛅ Partly Cloudy", variant: "body" },
+                    },
+                  ],
+                },
+                {
+                  id: "day3",
+                  type: "card",
+                  props: { title: "Wednesday" },
+                  children: [
+                    {
+                      id: "day3-temp",
+                      type: "text",
+                      props: { content: "65°F", variant: "h2" },
+                    },
+                    {
+                      id: "day3-desc",
+                      type: "text",
+                      props: { content: "🌧️ Rain", variant: "body" },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+    }
+
+    // Task list
+    if (lowerMessage.includes('task') || lowerMessage.includes('list') || lowerMessage.includes('todo')) {
+      return {
+        text: "I've created a task list for you:",
+        a2ui: {
+          version: "1.0",
+          components: [
+            {
+              id: "tasks-card",
+              type: "card",
+              props: { title: "My Tasks" },
+              children: [
+                {
+                  id: "task-list",
+                  type: "list",
+                  props: {
+                    items: [
+                      { id: "1", text: "Review Q4 financial reports", status: "completed" },
+                      { id: "2", text: "Prepare presentation slides", status: "in-progress" },
+                      { id: "3", text: "Schedule team sync meeting", status: "pending" },
+                      { id: "4", text: "Update project documentation", status: "pending" },
+                      { id: "5", text: "Send weekly status update", status: "pending" },
+                    ],
+                    variant: "checklist",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+    }
+
+    // Default response
+    return {
+      text: `I understand you're asking about "${message}". I can help you with:\n\n• Stock market data and charts\n• Weather forecasts\n• Task management\n• Data analysis and visualization\n\nTry asking about "trending stocks" or "show me a chart"!`,
+    };
+  }
+}
