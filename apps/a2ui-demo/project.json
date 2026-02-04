@@ -1,0 +1,33 @@
+{
+  "name": "a2ui-demo",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/a2ui-demo/src",
+  "projectType": "application",
+  "tags": ["scope:a2ui", "type:demo"],
+  "targets": {
+    "dev": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "npx vite",
+        "cwd": "apps/a2ui-demo"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["^build"],
+      "options": {
+        "command": "npx vite build",
+        "cwd": "apps/a2ui-demo"
+      },
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "preview": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx vite preview",
+        "cwd": "apps/a2ui-demo"
+      }
+    }
+  }
+}

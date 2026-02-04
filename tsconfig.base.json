@@ -14,7 +14,10 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@a2ui/core": ["libs/a2ui-core/src/index.ts"],
+      "@a2ui/react": ["libs/a2ui-react/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
