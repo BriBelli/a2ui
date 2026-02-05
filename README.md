@@ -12,11 +12,14 @@ A2UI enables agents to "speak UI" by sending declarative JSON describing the int
 a2ui/
 ├── apps/
 │   ├── frontend/          # Original React app (OpenAI integration)
-│   └── a2ui-demo/         # A2UI component demo application
+│   ├── a2ui-demo/         # A2UI component demo application (React)
+│   └── a2ui-chat/         # A2UI chat interface (Lit/Web Components)
 ├── libs/
 │   ├── a2ui-core/         # Core types, validation, and utilities
-│   └── a2ui-react/        # React renderer implementation
-├── backend/               # Python FastAPI backend (outside Nx)
+│   ├── a2ui-react/        # React renderer implementation
+│   └── a2ui-lit/          # Lit/Web Components renderer implementation
+├── backend/               # Python FastAPI backend with LLM providers
+├── docs/                  # Additional documentation and guides
 └── nx.json               # Nx workspace configuration
 ```
 
@@ -38,6 +41,14 @@ React implementation featuring:
 - **Hooks**: useA2UI, useA2UIFetch for state management
 - **Context**: Shared state across component tree
 
+### @a2ui/lit
+
+Lit/Web Components implementation featuring:
+- **Native web components**: Framework-agnostic components
+- **Built-in components**: Card, Button, Text, Container, Chart, DataTable, List, etc.
+- **Chat interface**: Pre-built chat components for conversational UIs
+- **Lightweight**: No framework dependencies, runs anywhere
+
 ## Getting Started
 
 ### Installation
@@ -46,7 +57,28 @@ React implementation featuring:
 npm install
 ```
 
-### Running the A2UI Demo
+### Quick Start (Recommended)
+
+```bash
+# Run backend + chat interface together
+npm run dev
+```
+
+This starts both the Python backend and the a2ui-chat interface for a full development experience.
+
+### Running Applications Individually
+
+#### A2UI Chat Interface (Lit/Web Components)
+
+```bash
+npm run a2ui:chat
+# or
+nx dev a2ui-chat
+```
+
+Interactive chat interface with A2UI component rendering. Best for testing conversational AI integrations.
+
+#### A2UI Demo (React)
 
 ```bash
 npm run a2ui:demo
@@ -54,19 +86,19 @@ npm run a2ui:demo
 nx dev a2ui-demo
 ```
 
-This starts a demo application showcasing:
+Static demo showcasing:
 - Restaurant finder UI
 - Flight booking form
 - Settings panel
 - Loading states
 
-### Running the Original Frontend
+#### Original Frontend (React)
 
 ```bash
 npm run frontend:start
 ```
 
-### Running the Backend
+#### Backend
 
 ```bash
 npm run backend:start
@@ -83,6 +115,11 @@ npm run build:all
 # Build specific libraries
 npm run a2ui:core:build
 npm run a2ui:react:build
+
+# Build applications
+npm run a2ui:demo:build
+npm run a2ui:chat:build
+npm run frontend:build
 ```
 
 ## A2UI Response Format
@@ -169,9 +206,37 @@ pip install -r requirements.txt
 python app.py
 ```
 
+Backend runs on `http://localhost:8000`
+
 ### API Endpoints
 - `GET /api` - Welcome message
-- `POST /api/openai` - OpenAI completion endpoint
+- `POST /api/chat` - Chat completion with A2UI response
+  - Supports multiple LLM providers (OpenAI, Anthropic, etc.)
+  - Returns structured A2UI JSON responses
+  - Streaming support available
+
+### LLM Provider Configuration
+
+The backend supports multiple LLM providers through `llm_providers.py`. Configure via environment variables:
+
+```bash
+# OpenAI
+export OPENAI_API_KEY=your_key_here
+
+# Anthropic (Claude)
+export ANTHROPIC_API_KEY=your_key_here
+```
+
+A2UI response formatting is handled by `a2ui_responses.py`, which provides utilities for agents to generate properly structured UI components.
+
+## Documentation
+
+Additional documentation is available in the `docs/` folder:
+
+- **[HOW-A2UI-WORKS.md](docs/HOW-A2UI-WORKS.md)** - Deep dive into how A2UI works internally
+- **[SCAFFOLDING-AND-PROTOCOL.md](docs/SCAFFOLDING-AND-PROTOCOL.md)** - Protocol specifications and scaffolding
+- **[WEB-SEARCH.md](docs/WEB-SEARCH.md)** - Web search integration guide
+- **[AGENTS.md](AGENTS.md)** - Instructions for AI agents working with A2UI
 
 ## License
 

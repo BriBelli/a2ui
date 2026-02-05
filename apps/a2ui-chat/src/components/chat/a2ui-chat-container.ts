@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import type { ChatMessage } from '../../services/chat-service';
-import { uiConfig, type LoadingStyle } from '../../config/ui-config';
+import { uiConfig } from '../../config/ui-config';
 
 @customElement('a2ui-chat-container')
 export class A2UIChatContainer extends LitElement {
@@ -134,127 +134,15 @@ export class A2UIChatContainer extends LitElement {
       margin: 0 auto;
     }
 
-    /* ========== Loading Styles ========== */
-
-    /* Base loading animation */
-    .loading {
-      animation: loadingIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-
-    @keyframes loadingIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* --- Subtle Loading Style --- */
-    .loading.subtle {
-      display: flex;
-      align-items: center;
-      gap: var(--a2ui-space-2);
-      padding: var(--a2ui-space-4);
-      color: var(--a2ui-text-secondary);
-      font-size: var(--a2ui-text-sm);
-    }
-
-    .loading.subtle .loading-dots {
-      display: flex;
-      gap: 4px;
-    }
-
-    .loading.subtle .loading-dot {
-      width: 6px;
-      height: 6px;
-      background: var(--a2ui-accent);
-      border-radius: 50%;
-      animation: bounce 1.4s infinite ease-in-out both;
-    }
-
-    .loading.subtle .loading-dot:nth-child(1) { animation-delay: -0.32s; }
-    .loading.subtle .loading-dot:nth-child(2) { animation-delay: -0.16s; }
-    .loading.subtle .loading-dot:nth-child(3) { animation-delay: 0; }
-
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-
-    /* --- Chat Loading Style --- */
-    .loading.chat {
-      display: flex;
-      align-items: flex-start;
-      gap: var(--a2ui-space-3);
-      padding: var(--a2ui-space-4) 0;
-    }
-
-    .loading-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: var(--a2ui-radius-full);
-      background: linear-gradient(135deg, #4285f4, #ea4335, #fbbc05, #34a853);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: var(--a2ui-text-sm);
-      font-weight: var(--a2ui-font-medium);
-      flex-shrink: 0;
-    }
-
-    .loading-content {
-      display: flex;
-      align-items: center;
-      gap: var(--a2ui-space-2);
-      padding: var(--a2ui-space-3) var(--a2ui-space-4);
-      background: var(--a2ui-bg-secondary);
-      border-radius: var(--a2ui-radius-xl);
-      border-bottom-left-radius: var(--a2ui-radius-sm);
-    }
-
-    .loading.chat .loading-dots {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-    }
-
-    .loading.chat .loading-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--a2ui-text-tertiary);
-      border-radius: 50%;
-      animation: pulse 1.4s infinite ease-in-out;
-    }
-
-    .loading.chat .loading-dot:nth-child(1) { animation-delay: 0s; }
-    .loading.chat .loading-dot:nth-child(2) { animation-delay: 0.2s; }
-    .loading.chat .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes pulse {
-      0%, 60%, 100% {
-        opacity: 0.3;
-        transform: scale(0.8);
-      }
-      30% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    .loading-text {
-      color: var(--a2ui-text-secondary);
-      font-size: var(--a2ui-text-sm);
-      margin-left: var(--a2ui-space-1);
+    /* Thinking indicator slot */
+    a2ui-thinking-indicator {
+      margin-bottom: var(--a2ui-space-4);
     }
   `;
 
   @property({ type: Array }) messages: ChatMessage[] = [];
   @property({ type: Boolean }) isLoading = false;
-  @property({ type: String, attribute: 'loading-style' }) loadingStyle: LoadingStyle = uiConfig.loadingStyle;
+  
 
   @query('.messages-container') private messagesContainer!: HTMLElement;
 
@@ -275,7 +163,7 @@ export class A2UIChatContainer extends LitElement {
   }
 
   updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has('messages')) {
+    if (changedProperties.has('messages') || changedProperties.has('isLoading')) {
       this.scrollToBottom();
     }
   }
@@ -308,35 +196,7 @@ export class A2UIChatContainer extends LitElement {
   }
 
   private renderLoading() {
-    const style = this.loadingStyle;
-
-    if (style === 'chat') {
-      return html`
-        <div class="loading chat">
-          <div class="loading-avatar">AI</div>
-          <div class="loading-content">
-            <div class="loading-dots">
-              <div class="loading-dot"></div>
-              <div class="loading-dot"></div>
-              <div class="loading-dot"></div>
-            </div>
-            <span class="loading-text">Thinking</span>
-          </div>
-        </div>
-      `;
-    }
-
-    // Subtle style (default fallback)
-    return html`
-      <div class="loading subtle">
-        <div class="loading-dots">
-          <div class="loading-dot"></div>
-          <div class="loading-dot"></div>
-          <div class="loading-dot"></div>
-        </div>
-        <span>Thinking...</span>
-      </div>
-    `;
+    return html`<a2ui-thinking-indicator></a2ui-thinking-indicator>`;
   }
 
   render() {
