@@ -49,7 +49,8 @@ export class A2UIChatMessage extends LitElement {
 
     .user .content {
       display: flex;
-      justify-content: flex-end;
+      flex-direction: column;
+      align-items: flex-end;
     }
 
     .bubble {
@@ -80,14 +81,27 @@ export class A2UIChatMessage extends LitElement {
       margin-top: var(--a2ui-space-3);
     }
 
-    .timestamp {
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: var(--a2ui-space-2);
       margin-top: var(--a2ui-space-1);
       font-size: var(--a2ui-text-xs);
       color: var(--a2ui-text-tertiary);
     }
 
-    .user .timestamp {
-      text-align: right;
+    .user .meta {
+      justify-content: flex-end;
+    }
+
+    .model-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--a2ui-space-1);
+      padding: 2px 6px;
+      background: var(--a2ui-bg-tertiary);
+      border-radius: var(--a2ui-radius-sm);
+      font-size: 10px;
     }
   `;
 
@@ -101,7 +115,7 @@ export class A2UIChatMessage extends LitElement {
   }
 
   render() {
-    const { role, content, a2ui, timestamp } = this.message;
+    const { role, content, a2ui, timestamp, model } = this.message;
     const isUser = role === 'user';
 
     return html`
@@ -126,7 +140,12 @@ export class A2UIChatMessage extends LitElement {
               ` : ''}
             </div>
           `}
-          <div class="timestamp">${this.formatTime(timestamp)}</div>
+          <div class="meta">
+            ${!isUser && model ? html`
+              <span class="model-badge">✨ ${model}</span>
+            ` : ''}
+            <span>${this.formatTime(timestamp)}</span>
+          </div>
         </div>
       </div>
     `;

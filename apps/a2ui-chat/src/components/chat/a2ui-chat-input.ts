@@ -64,7 +64,7 @@ export class A2UIChatInput extends LitElement {
       flex-shrink: 0;
       position: absolute;
       right: 6px;
-      bottom: 6px;
+      top: 6px;
     }
 
     .send-button:hover {

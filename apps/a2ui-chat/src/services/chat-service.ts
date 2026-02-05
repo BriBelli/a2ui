@@ -6,6 +6,7 @@ export interface ChatMessage {
   content: string;
   a2ui?: A2UIResponse;
   timestamp: number;
+  model?: string;
 }
 
 export interface ChatResponse {
@@ -13,17 +14,50 @@ export interface ChatResponse {
   a2ui?: A2UIResponse;
 }
 
+export interface LLMModel {
+  id: string;
+  name: string;
+}
+
+export interface LLMProvider {
+  id: string;
+  name: string;
+  models: LLMModel[];
+}
+
+export interface ProvidersResponse {
+  providers: LLMProvider[];
+}
+
 export class ChatService {
   private baseUrl = '/api';
 
-  async sendMessage(message: string): Promise<ChatResponse> {
+  async getProviders(): Promise<LLMProvider[]> {
+    try {
+      const response = await fetch(`${this.baseUrl}/providers`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data: ProvidersResponse = await response.json();
+      return data.providers;
+    } catch (error) {
+      console.error('Failed to fetch providers:', error);
+      return [];
+    }
+  }
+
+  async sendMessage(
+    message: string,
+    provider?: string,
+    model?: string
+  ): Promise<ChatResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, provider, model }),
       });
 
       if (!response.ok) {

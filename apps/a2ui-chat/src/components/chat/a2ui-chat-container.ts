@@ -120,6 +120,7 @@ export class A2UIChatContainer extends LitElement {
   @query('.messages-container') private messagesContainer!: HTMLElement;
 
   private suggestions = [
+    'Compare iPhone vs Android',
     'Top 5 trending stocks',
     'Show weather forecast',
     'Explain machine learning',
@@ -149,6 +150,9 @@ export class A2UIChatContainer extends LitElement {
   }
 
   private handleSendMessage(e: CustomEvent<{ message: string }>) {
+    // Stop the original event from bubbling further to prevent double-dispatch
+    e.stopPropagation();
+    
     this.dispatchEvent(new CustomEvent('send-message', {
       detail: e.detail,
       bubbles: true,

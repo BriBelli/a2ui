@@ -46,6 +46,10 @@ def get_a2ui_response(message: str) -> Dict[str, Any]:
     if any(word in lower_message for word in ['help', 'what can you do', 'capabilities']):
         return get_help_response()
     
+    # Compare X vs Y style queries (fallback when no provider selected or AI fails)
+    if 'compare' in lower_message and (' vs ' in lower_message or ' versus ' in lower_message):
+        return get_compare_response(message)
+    
     # Default: try AI or return generic response
     if HAS_OPENAI:
         return get_ai_response(message)
@@ -291,6 +295,49 @@ def get_task_response(message: str) -> Dict[str, Any]:
             ],
         },
     }
+
+
+def get_compare_response(message: str) -> Dict[str, Any]:
+    """Generate a comparison response (e.g. iPhone vs Android) as data-table."""
+    lower = message.lower()
+    # Default to iPhone vs Android; could parse message for other comparisons later
+    if 'iphone' in lower or 'android' in lower or 'phone' in lower:
+        return {
+            "text": "Here’s a side-by-side comparison of iPhone and Android:",
+            "a2ui": {
+                "version": "1.0",
+                "components": [
+                    {
+                        "id": "compare-container",
+                        "type": "container",
+                        "props": {"layout": "vertical", "gap": "md"},
+                        "children": [
+                            {
+                                "id": "compare-table",
+                                "type": "data-table",
+                                "props": {
+                                    "columns": [
+                                        {"key": "feature", "label": "Feature", "width": "180px"},
+                                        {"key": "iphone", "label": "iPhone", "width": "auto"},
+                                        {"key": "android", "label": "Android", "width": "auto"},
+                                    ],
+                                    "data": [
+                                        {"feature": "Ecosystem", "iphone": "Apple (iOS, Mac, Watch)", "android": "Google + many OEMs (Samsung, Pixel, etc.)"},
+                                        {"feature": "App Store", "iphone": "App Store", "android": "Google Play"},
+                                        {"feature": "Customization", "iphone": "Limited", "android": "High (launchers, widgets)"},
+                                        {"feature": "Privacy", "iphone": "Strong (App Tracking Transparency)", "android": "Improving (Google Play Protect)"},
+                                        {"feature": "Updates", "iphone": "Long support, same day", "android": "Varies by manufacturer"},
+                                        {"feature": "Price range", "iphone": "Premium", "android": "Budget to flagship"},
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        }
+    # Generic comparison placeholder
+    return get_default_response(message)
 
 
 def get_help_response() -> Dict[str, Any]:

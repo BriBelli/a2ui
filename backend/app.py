@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from openai_service import get_openai_completion
 from a2ui_responses import get_a2ui_response
+from llm_providers import llm_service
 
 app = FastAPI()
 
@@ -21,18 +22,36 @@ def home():
     return JSONResponse(content={"message": "Welcome to the A2UI Python Backend!"})
 
 
+@app.get("/api/providers")
+def get_providers():
+    """
+    Get available LLM providers and their models.
+    
+    Returns providers that have valid API keys configured.
+    """
+    providers = llm_service.get_available_providers()
+    return JSONResponse(content={"providers": providers})
+
+
 # A2UI Chat endpoint - returns structured A2UI responses
 @app.post("/api/chat")
 async def chat(request: Request):
     """
     Chat endpoint that returns A2UI protocol responses.
     
-    The frontend sends a message, and this endpoint returns:
+    Request body:
+    - message: The user's message
+    - provider: Optional LLM provider ID (openai, anthropic, gemini)
+    - model: Optional model ID for the provider
+    
+    Returns:
     - text: Optional plain text response
     - a2ui: Optional A2UI protocol JSON for rich UI rendering
     """
     data = await request.json()
     message = data.get("message", "")
+    provider_id = data.get("provider")
+    model = data.get("model")
     
     if not message:
         return JSONResponse(
@@ -40,7 +59,19 @@ async def chat(request: Request):
             status_code=400
         )
     
-    # Get A2UI response (may use AI or mock data)
+    # If provider is specified, use LLM service
+    if provider_id and model:
+        try:
+            response = await llm_service.generate(message, provider_id, model)
+            return JSONResponse(content=response)
+        except Exception as e:
+            print(f"LLM error: {e}")
+            # Fall back to mock responses on error
+            response = get_a2ui_response(message)
+            response["_error"] = str(e)
+            return JSONResponse(content=response)
+    
+    # Otherwise use mock/fallback responses
     response = get_a2ui_response(message)
     return JSONResponse(content=response)
 

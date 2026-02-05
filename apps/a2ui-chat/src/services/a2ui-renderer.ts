@@ -27,10 +27,23 @@ export class A2UIRenderer {
    * Render a single A2UI component
    */
   static renderComponent(component: A2UIComponent): TemplateResult {
+    if (!component || typeof component !== 'object') {
+      console.warn('Invalid component:', component);
+      return html`${nothing}`;
+    }
+
     const { type, id, props = {}, children = [] } = component;
 
+    // Skip components without a type
+    if (!type) {
+      console.warn('Component missing type:', component);
+      return html`${nothing}`;
+    }
+
     // Render children recursively
-    const renderedChildren = children.map(child => this.renderComponent(child));
+    const renderedChildren = Array.isArray(children) 
+      ? children.map(child => this.renderComponent(child))
+      : [];
 
     switch (type) {
       case 'text':
@@ -122,6 +135,16 @@ export class A2UIRenderer {
             .variant=${props.variant || 'default'}
             .disabled=${props.disabled || false}
           ></a2ui-button>
+        `;
+
+      case 'image':
+        return html`
+          <a2ui-image
+            .id=${id}
+            .src=${props.src || props.url || ''}
+            .alt=${props.alt || props.caption || ''}
+            .caption=${props.caption || ''}
+          ></a2ui-image>
         `;
 
       default:
