@@ -92,8 +92,22 @@ Available component types:
        labels: string[],
        datasets: [{ label: string, data: number[], backgroundColor?: string|string[], borderColor?: string }]
      },
-     options?: { height?: number }
+     options?: {
+       height?: number,           // Chart height in px (default 240)
+       fillArea?: boolean,        // Gradient fill under line charts (auto for single dataset)
+       showGrid?: boolean,        // Show grid lines (default: off for line, on for bar)
+       showLegend?: boolean,      // Show legend (auto: hidden for single dataset)
+       currency?: string,         // Format values as currency, e.g. "USD"
+       referenceLine?: number,    // Horizontal dotted reference line at this value
+       referenceLabel?: string    // Label for the reference line, e.g. "Previous close"
+     }
    }
+   CHART TIPS:
+   - For stock/price data: use line chart with fillArea:true, currency:"USD", and a referenceLine at the opening/previous value
+   - For single stock trends: use green borderColor "#81c995" for positive, red "#f28b82" for negative
+   - For comparisons: use different borderColor per dataset, no fillArea
+   - For rankings/categories: use bar chart
+   - Always provide at least 6-12 data points for smooth line charts
 
 7. button - Clickable button
    props: { label: string, variant?: "default"|"primary"|"outlined"|"text"|"danger" }
@@ -138,7 +152,9 @@ RESPONSE RULES:
 3. Comparisons → use data-table
 4. Data/stats → use chart with actual values
 5. ALWAYS include "id" on every component
-6. For real-time queries (stocks, weather, sports): provide last known data, historical context, or typical ranges
+6. For real-time queries (stocks, weather, sports): USE the web search results provided to give accurate current data
+7. For stock/market data: ALWAYS use a line chart with fillArea, currency, and referenceLine for price trends. Use actual values from search results.
+8. When web search results are present, extract specific numbers and use them in charts and tables — do NOT say "I can't provide real-time data"
 
 Example simple response:
 {{"text": "Hello! How can I help?", "a2ui": {{"version": "1.0", "components": [{{"id": "greeting", "type": "text", "props": {{"content": "I'm ready to assist you.", "variant": "body"}}}}]}}}}
