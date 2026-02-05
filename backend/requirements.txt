@@ -3,3 +3,4 @@ uvicorn
 openai
 anthropic
 google-generativeai
+tavily-python

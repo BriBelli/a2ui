@@ -43,6 +43,8 @@ async def chat(request: Request):
     - message: The user's message
     - provider: Optional LLM provider ID (openai, anthropic, gemini)
     - model: Optional model ID for the provider
+    - history: Optional list of previous messages [{role, content}]
+    - enableWebSearch: Optional boolean to enable web search tool
     
     Returns:
     - text: Optional plain text response
@@ -52,6 +54,8 @@ async def chat(request: Request):
     message = data.get("message", "")
     provider_id = data.get("provider")
     model = data.get("model")
+    history = data.get("history", [])
+    enable_web_search = data.get("enableWebSearch", False)
     
     if not message:
         return JSONResponse(
@@ -62,7 +66,13 @@ async def chat(request: Request):
     # If provider is specified, use LLM service
     if provider_id and model:
         try:
-            response = await llm_service.generate(message, provider_id, model)
+            response = await llm_service.generate(
+                message, 
+                provider_id, 
+                model,
+                history=history,
+                enable_web_search=enable_web_search
+            )
             return JSONResponse(content=response)
         except Exception as e:
             print(f"LLM error: {e}")

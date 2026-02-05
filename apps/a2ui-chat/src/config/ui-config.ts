@@ -1,7 +1,7 @@
 /**
- * A2UI Chat UI Configuration
+ * A2UI Chat Configuration
  * 
- * Centralized configuration for UI behaviors and styles.
+ * Centralized configuration for UI behaviors, styles, and AI features.
  * Import and modify these settings to customize the chat experience.
  */
 
@@ -26,13 +26,41 @@ export interface UIConfig {
   animateWelcome: boolean;
 }
 
+export interface AIConfig {
+  /**
+   * Send conversation history with each message
+   * Enables context-aware responses and follow-up questions
+   */
+  conversationHistory: boolean;
+
+  /**
+   * Maximum number of previous messages to include
+   */
+  maxHistoryMessages: number;
+
+  /**
+   * Enable web search tool for real-time information
+   * Requires TAVILY_API_KEY on backend
+   */
+  webSearch: boolean;
+}
+
 /**
  * Default UI configuration
  */
 export const uiConfig: UIConfig = {
-  loadingStyle: 'subtle',
+  loadingStyle: 'chat',
   animateMessages: true,
   animateWelcome: true,
+};
+
+/**
+ * Default AI configuration
+ */
+export const aiConfig: AIConfig = {
+  conversationHistory: true,
+  maxHistoryMessages: 20,
+  webSearch: true,
 };
 
 /**
@@ -40,4 +68,11 @@ export const uiConfig: UIConfig = {
  */
 export function setUIConfig(config: Partial<UIConfig>): void {
   Object.assign(uiConfig, config);
+}
+
+/**
+ * Update AI configuration at runtime
+ */
+export function setAIConfig(config: Partial<AIConfig>): void {
+  Object.assign(aiConfig, config);
 }

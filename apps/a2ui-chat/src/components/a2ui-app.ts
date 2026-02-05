@@ -123,10 +123,12 @@ export class A2UIApp extends LitElement {
     this.isLoading = true;
 
     try {
+      // Pass current messages for conversation history
       const response = await this.chatService.sendMessage(
         message,
         this.selectedProvider,
-        this.selectedModel
+        this.selectedModel,
+        this.messages
       );
       
       // Get model name for display

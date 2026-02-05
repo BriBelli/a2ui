@@ -1,4 +1,5 @@
 import type { A2UIResponse } from '@a2ui/core';
+import { aiConfig } from '../config/ui-config';
 
 export interface ChatMessage {
   id: string;
@@ -7,6 +8,12 @@ export interface ChatMessage {
   a2ui?: A2UIResponse;
   timestamp: number;
   model?: string;
+}
+
+/** Simplified message format for API history */
+export interface HistoryMessage {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export interface ChatResponse {
@@ -49,15 +56,35 @@ export class ChatService {
   async sendMessage(
     message: string,
     provider?: string,
-    model?: string
+    model?: string,
+    history?: ChatMessage[]
   ): Promise<ChatResponse> {
     try {
+      // Build request body
+      const body: Record<string, unknown> = { 
+        message, 
+        provider, 
+        model,
+        enableWebSearch: aiConfig.webSearch,
+      };
+
+      // Add conversation history if enabled
+      if (aiConfig.conversationHistory && history && history.length > 0) {
+        const historyMessages: HistoryMessage[] = history
+          .slice(-aiConfig.maxHistoryMessages)
+          .map(msg => ({
+            role: msg.role,
+            content: msg.content,
+          }));
+        body.history = historyMessages;
+      }
+
       const response = await fetch(`${this.baseUrl}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message, provider, model }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
