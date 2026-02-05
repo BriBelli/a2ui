@@ -18,35 +18,32 @@ from abc import ABC, abstractmethod
 
 def parse_llm_json(content: str) -> Dict[str, Any]:
     """
-    Parse JSON from LLM response, handling common formatting issues.
+    Parse JSON from an LLM response string.
     
-    Handles:
-    - Markdown code fences (```json ... ```)
-    - Extra text before/after JSON
-    - Whitespace issues
+    Strips markdown fences, extracts JSON, and returns a dict.
+    Providers should use JSON mode when available so this is just a safety net.
     """
-    original = content
     content = content.strip()
     
-    # Remove markdown code fences
+    # Strip markdown code fences
     if content.startswith("```"):
         content = re.sub(r'^```\w*\n?', '', content)
         content = re.sub(r'\n?```$', '', content)
         content = content.strip()
     
-    # Extract JSON object using regex
+    # Extract the outermost JSON object
     match = re.search(r'\{[\s\S]*\}', content)
     if match:
         content = match.group()
     
     try:
         result = json.loads(content)
-        print(f"✓ JSON parsed successfully, keys: {result.keys()}")
-        return result
+        if isinstance(result, dict):
+            return result
+        return {"text": content}
     except json.JSONDecodeError as e:
-        print(f"✗ JSON parse error: {e}")
-        print(f"  Content preview: {content[:200]}...")
-        return {"text": original}
+        print(f"[parse] JSON error: {e} — preview: {content[:200]}")
+        return {"text": content}
 
 # A2UI Schema definition for LLM context
 A2UI_SCHEMA = """
@@ -140,14 +137,13 @@ RESPONSE RULES:
 2. Complex topics → use cards with lists for organization
 3. Comparisons → use data-table
 4. Data/stats → use chart with actual values
-5. ALWAYS return valid JSON only - no markdown, no extra text
-6. ALWAYS include "id" on every component
-7. For real-time queries (stocks, weather, sports): provide last known data, historical context, or typical ranges
+5. ALWAYS include "id" on every component
+6. For real-time queries (stocks, weather, sports): provide last known data, historical context, or typical ranges
 
 Example simple response:
 {{"text": "Hello! How can I help?", "a2ui": {{"version": "1.0", "components": [{{"id": "greeting", "type": "text", "props": {{"content": "I'm ready to assist you.", "variant": "body"}}}}]}}}}
 
-Example complex response structure:
+Example complex response:
 {{"text": "Brief intro", "a2ui": {{"version": "1.0", "components": [{{"id": "main-card", "type": "card", "props": {{"title": "Topic"}}, "children": [{{"id": "info", "type": "text", "props": {{"content": "Details...", "variant": "body"}}}}, {{"id": "points", "type": "list", "props": {{"variant": "bullet", "items": [{{"id": "p1", "text": "Point 1"}}, {{"id": "p2", "text": "Point 2"}}]}}}}]}}]}}}}
 
 Match response complexity to question complexity. Use real data, not placeholders."""
@@ -219,6 +215,7 @@ class OpenAIProvider(LLMProvider):
             messages=messages,
             max_tokens=2000,
             temperature=0.7,
+            response_format={"type": "json_object"},
         )
         
         content = response.choices[0].message.content.strip()
@@ -317,11 +314,13 @@ class GeminiProvider(LLMProvider):
                     "parts": [msg["content"]]
                 })
         
+        generation_config = {"response_mime_type": "application/json"}
+        
         if chat_history:
             chat = gen_model.start_chat(history=chat_history)
-            response = chat.send_message(message)
+            response = chat.send_message(message, generation_config=generation_config)
         else:
-            response = gen_model.generate_content(message)
+            response = gen_model.generate_content(message, generation_config=generation_config)
         
         content = response.text.strip()
         return parse_llm_json(content)
