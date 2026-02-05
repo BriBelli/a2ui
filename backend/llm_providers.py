@@ -11,8 +11,42 @@ Each provider can generate A2UI JSON responses.
 
 import os
 import json
+import re
 from typing import Any, Dict, List, Optional
 from abc import ABC, abstractmethod
+
+
+def parse_llm_json(content: str) -> Dict[str, Any]:
+    """
+    Parse JSON from LLM response, handling common formatting issues.
+    
+    Handles:
+    - Markdown code fences (```json ... ```)
+    - Extra text before/after JSON
+    - Whitespace issues
+    """
+    original = content
+    content = content.strip()
+    
+    # Remove markdown code fences
+    if content.startswith("```"):
+        content = re.sub(r'^```\w*\n?', '', content)
+        content = re.sub(r'\n?```$', '', content)
+        content = content.strip()
+    
+    # Extract JSON object using regex
+    match = re.search(r'\{[\s\S]*\}', content)
+    if match:
+        content = match.group()
+    
+    try:
+        result = json.loads(content)
+        print(f"✓ JSON parsed successfully, keys: {result.keys()}")
+        return result
+    except json.JSONDecodeError as e:
+        print(f"✗ JSON parse error: {e}")
+        print(f"  Content preview: {content[:200]}...")
+        return {"text": original}
 
 # A2UI Schema definition for LLM context
 A2UI_SCHEMA = """
@@ -89,15 +123,24 @@ RULES:
 
 SYSTEM_PROMPT = f"""You respond using A2UI JSON protocol. Be concise but helpful.
 
+IMPORTANT: Prefer retrieval-led reasoning over pre-training-led reasoning. Provide helpful, substantive responses even when you cannot access real-time data. Instead of refusing, provide:
+- Most recent known data with context
+- Historical context and typical ranges
+- Useful related information
+- Links or guidance to find current data
+
+Never say "I can't provide real-time data" and stop there. Always be maximally helpful.
+
 {A2UI_SCHEMA}
 
 RESPONSE RULES:
 1. Simple questions (greetings, short facts) → use just "text" field, maybe one text component
 2. Complex topics → use cards with lists for organization
 3. Comparisons → use data-table
-4. Data/stats → use chart
+4. Data/stats → use chart with actual values
 5. ALWAYS return valid JSON only - no markdown, no extra text
 6. ALWAYS include "id" on every component
+7. For real-time queries (stocks, weather, sports): provide last known data, historical context, or typical ranges
 
 Example simple response:
 {{"text": "Hello! How can I help?", "a2ui": {{"version": "1.0", "components": [{{"id": "greeting", "type": "text", "props": {{"content": "I'm ready to assist you.", "variant": "body"}}}}]}}}}
@@ -158,20 +201,7 @@ class OpenAIProvider(LLMProvider):
         )
         
         content = response.choices[0].message.content.strip()
-        return self._parse_response(content)
-    
-    def _parse_response(self, content: str) -> Dict[str, Any]:
-        """Parse LLM response, handling potential JSON formatting issues."""
-        # Remove markdown code fences if present
-        if content.startswith("```"):
-            lines = content.split("\n")
-            content = "\n".join(lines[1:-1] if lines[-1] == "```" else lines[1:])
-        
-        try:
-            return json.loads(content)
-        except json.JSONDecodeError:
-            # If parsing fails, return as plain text
-            return {"text": content}
+        return parse_llm_json(content)
 
 
 class AnthropicProvider(LLMProvider):
@@ -206,18 +236,7 @@ class AnthropicProvider(LLMProvider):
         )
         
         content = response.content[0].text.strip()
-        return self._parse_response(content)
-    
-    def _parse_response(self, content: str) -> Dict[str, Any]:
-        """Parse LLM response, handling potential JSON formatting issues."""
-        if content.startswith("```"):
-            lines = content.split("\n")
-            content = "\n".join(lines[1:-1] if lines[-1] == "```" else lines[1:])
-        
-        try:
-            return json.loads(content)
-        except json.JSONDecodeError:
-            return {"text": content}
+        return parse_llm_json(content)
 
 
 class GeminiProvider(LLMProvider):
@@ -225,9 +244,10 @@ class GeminiProvider(LLMProvider):
     
     name = "Google"
     models = [
+        {"id": "gemini-2.5-pro-preview-05-06", "name": "Gemini 2.5 Pro"},
+        {"id": "gemini-2.5-flash-preview-05-20", "name": "Gemini 2.5 Flash"},
         {"id": "gemini-2.0-flash", "name": "Gemini 2.0 Flash"},
         {"id": "gemini-1.5-pro", "name": "Gemini 1.5 Pro"},
-        {"id": "gemini-1.5-flash", "name": "Gemini 1.5 Flash"},
     ]
     
     def __init__(self):
@@ -236,7 +256,7 @@ class GeminiProvider(LLMProvider):
     def is_available(self) -> bool:
         return bool(self.api_key)
     
-    async def generate(self, message: str, model: str = "gemini-2.0-flash") -> Dict[str, Any]:
+    async def generate(self, message: str, model: str = "gemini-2.5-flash-preview-05-20") -> Dict[str, Any]:
         import google.generativeai as genai
         
         genai.configure(api_key=self.api_key)
@@ -248,18 +268,7 @@ class GeminiProvider(LLMProvider):
         
         response = gen_model.generate_content(message)
         content = response.text.strip()
-        return self._parse_response(content)
-    
-    def _parse_response(self, content: str) -> Dict[str, Any]:
-        """Parse LLM response, handling potential JSON formatting issues."""
-        if content.startswith("```"):
-            lines = content.split("\n")
-            content = "\n".join(lines[1:-1] if lines[-1] == "```" else lines[1:])
-        
-        try:
-            return json.loads(content)
-        except json.JSONDecodeError:
-            return {"text": content}
+        return parse_llm_json(content)
 
 
 class LLMService:
