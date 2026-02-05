@@ -162,13 +162,35 @@ def should_search(message: str) -> bool:
     """
     Determine if a message would benefit from web search.
     
-    Looks for indicators of real-time information needs.
+    Looks for indicators of real-time information needs:
+    - Temporal cues (current, today, latest, etc.)
+    - Financial/market terms (stock, dow, nasdaq, crypto, etc.)
+    - Data queries (weather, sports, news, etc.)
+    - Direct questions that imply factual lookup
     """
     search_indicators = [
-        "current", "latest", "today", "now", "recent",
-        "price", "stock", "weather", "news",
-        "what is the", "how much", "who won",
-        "score", "result", "update",
+        # Temporal cues
+        "current", "latest", "today", "now", "recent", "right now",
+        "this week", "this month", "this year", "yesterday",
+        # Financial / markets
+        "price", "stock", "market", "trading", "index", "fund",
+        "dow", "djia", "nasdaq", "s&p", "sp500", "s&p500",
+        "nyse", "russell", "ftse", "nikkei", "hang seng",
+        "bitcoin", "btc", "eth", "ethereum", "crypto",
+        "forex", "bond", "treasury", "yield", "earnings",
+        "ipo", "dividend", "market cap",
+        # Ticker patterns — 1-5 uppercase letters common in follow-ups
+        "ticker", "share", "shares",
+        # Real-time data
+        "weather", "forecast", "temperature",
+        "news", "headlines", "breaking",
+        "score", "game", "match", "standings",
+        # Direct questions
+        "what is the", "how much", "who won", "who is",
+        "where is", "when is", "is it",
+        "compare", "vs", "versus",
+        "result", "update", "status",
+        # Year references
         "2024", "2025", "2026",
     ]
     

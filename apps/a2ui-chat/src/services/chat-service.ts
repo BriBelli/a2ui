@@ -151,7 +151,7 @@ export class ChatService {
     // Chart-related queries
     if (lowerMessage.includes('chart') || lowerMessage.includes('graph') || lowerMessage.includes('visual')) {
       return {
-        text: "Here's a performance chart for the trending stocks:",
+        text: "Here's the performance overview for trending stocks:",
         a2ui: {
           version: "1.0",
           components: [
@@ -164,35 +164,57 @@ export class ChatService {
                   id: "stock-chart",
                   type: "chart",
                   props: {
-                    chartType: "bar",
-                    title: "Stock Performance (YTD Change %)",
+                    chartType: "line",
+                    title: "NVDA — 30 Day Price",
                     data: {
-                      labels: ["NVDA", "META", "MSFT", "AAPL", "GOOGL"],
+                      labels: [
+                        "Jan 6", "Jan 8", "Jan 10", "Jan 13", "Jan 15",
+                        "Jan 17", "Jan 21", "Jan 23", "Jan 27", "Jan 29",
+                        "Jan 31", "Feb 3",
+                      ],
                       datasets: [
                         {
-                          label: "YTD Performance %",
-                          data: [85.2, 42.5, 35.8, 22.1, 18.5],
-                          backgroundColor: [
-                            "#76b900",
-                            "#0668E1",
-                            "#00a1f1",
-                            "#555555",
-                            "#4285f4",
-                          ],
+                          label: "NVDA",
+                          data: [849, 862, 871, 858, 876, 891, 885, 903, 910, 895, 918, 892],
+                          borderColor: "#81c995",
                         },
                       ],
                     },
                     options: {
-                      height: 300,
+                      height: 280,
+                      fillArea: true,
+                      currency: "USD",
+                      referenceLine: 849,
+                      referenceLabel: "Previous close",
                     },
                   },
                 },
                 {
-                  id: "line-chart",
+                  id: "bar-chart",
+                  type: "chart",
+                  props: {
+                    chartType: "bar",
+                    title: "YTD Performance (%)",
+                    data: {
+                      labels: ["NVDA", "META", "MSFT", "AAPL", "GOOGL"],
+                      datasets: [
+                        {
+                          label: "YTD Change %",
+                          data: [85.2, 42.5, 35.8, 22.1, 18.5],
+                        },
+                      ],
+                    },
+                    options: {
+                      height: 220,
+                    },
+                  },
+                },
+                {
+                  id: "multi-line",
                   type: "chart",
                   props: {
                     chartType: "line",
-                    title: "30-Day Price Trend",
+                    title: "Price Comparison — 30 Days",
                     data: {
                       labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
                       datasets: [
@@ -204,12 +226,18 @@ export class ChatService {
                         {
                           label: "MSFT",
                           data: [390, 400, 408, 415],
-                          borderColor: "#00a1f1",
+                          borderColor: "#8ab4f8",
+                        },
+                        {
+                          label: "META",
+                          data: [440, 455, 470, 486],
+                          borderColor: "#c58af9",
                         },
                       ],
                     },
                     options: {
-                      height: 250,
+                      height: 260,
+                      currency: "USD",
                     },
                   },
                 },

@@ -7,6 +7,7 @@ import './components/a2ui-model-selector';
 import './components/chat/a2ui-chat-container';
 import './components/chat/a2ui-chat-input';
 import './components/chat/a2ui-chat-message';
+import './components/chat/a2ui-thinking-indicator';
 
 // Import A2UI Web Components
 import './components/a2ui/a2ui-text';
