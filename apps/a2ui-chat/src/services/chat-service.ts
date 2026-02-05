@@ -1,4 +1,5 @@
 import type { A2UIResponse } from '@a2ui/core';
+import { aiConfig } from '../config/ui-config';
 
 export interface ChatMessage {
   id: string;
@@ -6,6 +7,13 @@ export interface ChatMessage {
   content: string;
   a2ui?: A2UIResponse;
   timestamp: number;
+  model?: string;
+}
+
+/** Simplified message format for API history */
+export interface HistoryMessage {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export interface ChatResponse {
@@ -13,17 +21,70 @@ export interface ChatResponse {
   a2ui?: A2UIResponse;
 }
 
+export interface LLMModel {
+  id: string;
+  name: string;
+}
+
+export interface LLMProvider {
+  id: string;
+  name: string;
+  models: LLMModel[];
+}
+
+export interface ProvidersResponse {
+  providers: LLMProvider[];
+}
+
 export class ChatService {
   private baseUrl = '/api';
 
-  async sendMessage(message: string): Promise<ChatResponse> {
+  async getProviders(): Promise<LLMProvider[]> {
     try {
+      const response = await fetch(`${this.baseUrl}/providers`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data: ProvidersResponse = await response.json();
+      return data.providers;
+    } catch (error) {
+      console.error('Failed to fetch providers:', error);
+      return [];
+    }
+  }
+
+  async sendMessage(
+    message: string,
+    provider?: string,
+    model?: string,
+    history?: ChatMessage[]
+  ): Promise<ChatResponse> {
+    try {
+      // Build request body
+      const body: Record<string, unknown> = { 
+        message, 
+        provider, 
+        model,
+        enableWebSearch: aiConfig.webSearch,
+      };
+
+      // Add conversation history if enabled
+      if (aiConfig.conversationHistory && history && history.length > 0) {
+        const historyMessages: HistoryMessage[] = history
+          .slice(-aiConfig.maxHistoryMessages)
+          .map(msg => ({
+            role: msg.role,
+            content: msg.content,
+          }));
+        body.history = historyMessages;
+      }
+
       const response = await fetch(`${this.baseUrl}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
