@@ -211,9 +211,9 @@ export class A2UIChatContainer extends LitElement {
             <p class="welcome-subtitle">
               Ask me anything. I can search the web, analyze data, create charts, and more.
             </p>
-            ${uiConfig.suggestions && this.suggestions.length > 0 ? html`
+            ${uiConfig.maxSuggestions > 0 && this.suggestions.length > 0 ? html`
               <div class="suggestions">
-                ${this.suggestions.map(s => html`
+                ${this.suggestions.slice(0, uiConfig.maxSuggestions).map(s => html`
                   <button class="suggestion" @click=${() => this.handleSuggestionClick(s)}>
                     ${s}
                   </button>
