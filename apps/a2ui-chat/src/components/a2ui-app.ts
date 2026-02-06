@@ -411,7 +411,7 @@ export class A2UIApp extends LitElement {
                   ? html`<img src=${this.user.picture} alt="" />`
                   : this.getInitials(this.user)}
               </div>
-              <span>${this.user.email}</span>
+              <!--<span>${this.user.email}</span>-->
             </div>
           ` : ''}
 
