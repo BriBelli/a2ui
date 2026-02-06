@@ -207,23 +207,68 @@ export class A2UIApp extends LitElement {
 
   private chatService = new ChatService();
 
+  // ── History / back-button navigation ────────────────────
+  // Two pushState calls: login modal open + first chat message.
+  // Back pops them naturally. No hashes, no trapping, no redirects.
+  private boundPopstate = this.onPopstate.bind(this);
+
   async connectedCallback() {
     super.connectedCallback();
+    window.addEventListener('popstate', this.boundPopstate);
 
-    // Listen for auth changes
     authService.addEventListener('change', () => {
       this.authLoading = authService.isLoading;
       this.isAuthenticated = authService.isAuthenticated;
       this.user = authService.user;
-      this.showLogin = false; // close modal on login success
+
+      if (this.isAuthenticated) {
+        this.showLogin = false;
+        // Pop the login modal entry so it doesn't linger in the stack
+        if (history.state?.a2ui === 'login') {
+          history.back();
+        }
+        this.loadProviders();
+      }
     });
 
-    // Initialize auth
     await authService.init();
-
-    // Load providers once authenticated
     if (authService.isAuthenticated) {
       await this.loadProviders();
+    }
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('popstate', this.boundPopstate);
+  }
+
+  // Saved conversation for forward-button restore
+  private savedMessages: ChatMessage[] = [];
+
+  private onPopstate() {
+    const state = history.state;
+
+    if (!this.isAuthenticated) {
+      this.showLogin = state?.a2ui === 'login';
+    } else if (state?.a2ui === 'chat' && this.messages.length === 0 && this.savedMessages.length > 0) {
+      // Forward to active conversation → restore
+      this.messages = this.savedMessages;
+    } else if (state?.a2ui !== 'chat' && this.messages.length > 0) {
+      // Back from active conversation → save and clear
+      this.savedMessages = [...this.messages];
+      this.messages = [];
+    }
+  }
+
+  private openLogin() {
+    this.showLogin = true;
+    history.pushState({ a2ui: 'login' }, '');
+  }
+
+  private closeLogin() {
+    this.showLogin = false;
+    if (history.state?.a2ui === 'login') {
+      history.back();
     }
   }
 
@@ -244,12 +289,19 @@ export class A2UIApp extends LitElement {
     const { message } = e.detail;
     if (!message.trim()) return;
 
+    const isFirstMessage = this.messages.length === 0;
+
     this.messages = [...this.messages, {
       id: crypto.randomUUID(),
       role: 'user',
       content: message,
       timestamp: Date.now(),
     }];
+
+    // Push history entry on first message so back clears the conversation
+    if (isFirstMessage) {
+      history.pushState({ a2ui: 'chat' }, '');
+    }
 
     this.isLoading = true;
 
@@ -287,6 +339,10 @@ export class A2UIApp extends LitElement {
 
   private clearChat() {
     this.messages = [];
+    this.savedMessages = [];
+    if (history.state?.a2ui === 'chat') {
+      history.back();
+    }
   }
 
   private async handleLogout() {
@@ -318,12 +374,12 @@ export class A2UIApp extends LitElement {
           <div class="welcome-logo"></div>
           <h1>Welcome to A2UI Chat</h1>
           <p>AI-powered assistant with rich interactive responses. Sign in to get started.</p>
-          <button class="get-started-btn" @click=${() => this.showLogin = true}>
+          <button class="get-started-btn" @click=${this.openLogin}>
             Get Started
           </button>
         </div>
         ${this.showLogin ? html`
-          <a2ui-login @close=${() => this.showLogin = false}></a2ui-login>
+          <a2ui-login @close=${this.closeLogin}></a2ui-login>
         ` : ''}
       `;
     }
