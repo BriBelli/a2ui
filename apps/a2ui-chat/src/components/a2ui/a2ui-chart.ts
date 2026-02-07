@@ -223,12 +223,24 @@ export class A2UIChart extends LitElement {
     return value.toLocaleString();
   }
 
+  /** Read a CSS custom property from the document root. */
+  private token(name: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
   private renderChart() {
     if (!this.canvas) return;
 
     this.chart?.destroy();
     const ctx = this.canvas.getContext('2d');
     if (!ctx) return;
+
+    // Resolve theme-aware colors from tokens
+    const textSecondary = this.token('--a2ui-text-secondary') || '#9aa0a6';
+    const textTertiary = this.token('--a2ui-text-tertiary') || '#71767b';
+    const textPrimary = this.token('--a2ui-text-primary') || '#e3e3e3';
+    const bgApp = this.token('--a2ui-bg-app') || '#1a1a1a';
+    const borderSubtle = this.token('--a2ui-border-subtle') || 'rgba(255,255,255,0.06)';
 
     const isLine = this.chartType === 'line';
     const isBar = this.chartType === 'bar';
@@ -264,7 +276,7 @@ export class A2UIChart extends LitElement {
         pointRadius: isLine ? 0 : undefined,
         pointHoverRadius: isLine ? 5 : undefined,
         pointHoverBackgroundColor: isLine ? color : undefined,
-        pointHoverBorderColor: isLine ? '#1a1a1a' : undefined,
+        pointHoverBorderColor: isLine ? bgApp : undefined,
         pointHoverBorderWidth: isLine ? 2 : undefined,
         borderRadius: isBar ? 4 : undefined,
         maxBarThickness: isBar ? 48 : undefined,
@@ -303,7 +315,7 @@ export class A2UIChart extends LitElement {
             display: showLegend,
             position: 'bottom',
             labels: {
-              color: '#9aa0a6',
+              color: textSecondary,
               padding: 16,
               usePointStyle: true,
               pointStyle: 'circle',
@@ -317,10 +329,10 @@ export class A2UIChart extends LitElement {
           },
           tooltip: {
             enabled: true,
-            backgroundColor: 'rgba(32, 33, 36, 0.95)',
-            titleColor: '#e3e3e3',
-            bodyColor: '#9aa0a6',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: bgApp,
+            titleColor: textPrimary,
+            bodyColor: textSecondary,
+            borderColor: borderSubtle,
             borderWidth: 1,
             cornerRadius: 8,
             padding: { top: 8, bottom: 8, left: 12, right: 12 },
@@ -362,7 +374,7 @@ export class A2UIChart extends LitElement {
               display: false,
             },
             ticks: {
-              color: '#71767b',
+              color: textTertiary,
               maxRotation: 0,
               padding: 8,
               font: {
@@ -383,7 +395,7 @@ export class A2UIChart extends LitElement {
               display: false,
             },
             ticks: {
-              color: '#71767b',
+              color: textTertiary,
               padding: 8,
               font: {
                 family: 'Google Sans, Roboto, sans-serif',
