@@ -40,6 +40,11 @@ interface ChartOptions {
   referenceLabel?: string;
 }
 
+/** Read a CSS custom property from :root. */
+function rootToken(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 /**
  * Crosshair plugin -- draws a vertical dashed line at the hovered point.
  * Gives that Google Finance feel on line charts.
@@ -61,7 +66,7 @@ const crosshairPlugin: Plugin = {
     ctx.moveTo(x, topY);
     ctx.lineTo(x, bottomY);
     ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+    ctx.strokeStyle = rootToken('--a2ui-border-strong') || 'rgba(255, 255, 255, 0.2)';
     ctx.setLineDash([4, 4]);
     ctx.stroke();
     ctx.restore();
@@ -87,12 +92,12 @@ const referenceLinePlugin: Plugin = {
     ctx.moveTo(chart.chartArea.left, y);
     ctx.lineTo(chart.chartArea.right, y);
     ctx.lineWidth = 1;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.strokeStyle = rootToken('--a2ui-border-default') || 'rgba(255, 255, 255, 0.15)';
     ctx.setLineDash([3, 5]);
     ctx.stroke();
 
     if (refConfig.label) {
-      ctx.fillStyle = 'rgba(154, 160, 166, 0.8)';
+      ctx.fillStyle = rootToken('--a2ui-text-secondary') || 'rgba(154, 160, 166, 0.8)';
       ctx.font = '10px Google Sans, Roboto, sans-serif';
       ctx.textAlign = 'right';
       ctx.fillText(
@@ -122,7 +127,7 @@ export class A2UIChart extends LitElement {
     }
 
     .chart-container:hover {
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--a2ui-shadow-lg);
     }
 
     .chart-header {
@@ -367,7 +372,7 @@ export class A2UIChart extends LitElement {
           x: {
             grid: {
               display: showGrid,
-              color: 'rgba(255, 255, 255, 0.04)',
+              color: borderSubtle,
               drawTicks: false,
             },
             border: {
@@ -388,7 +393,7 @@ export class A2UIChart extends LitElement {
           y: {
             grid: {
               display: true,
-              color: 'rgba(255, 255, 255, 0.04)',
+              color: borderSubtle,
               drawTicks: false,
             },
             border: {
